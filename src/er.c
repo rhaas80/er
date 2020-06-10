@@ -298,7 +298,7 @@ int ER_Create_Scheme(
   redset* d = ER_MALLOC(sizeof(redset));
 
   /* create the scheme */
-  if (redset_create(encoding_type, comm, failure_domain, d) == REDSET_SUCCESS) {
+  if (redset_create(encoding_type, 0, comm, failure_domain, d) == REDSET_SUCCESS) {
     /* bump our internal counter */
     er_scheme_counter++;
 
