@@ -39,7 +39,8 @@ int ER_Create_Scheme(
   MPI_Comm comm,              /**< [IN] - communicator of processes participating in scheme */
   const char* failure_domain, /**< [IN] - processes with same value of failure_domain are assumed to fail at the same time */
   int data_blocks,            /**< [IN] - number of original data blocks */
-  int erasure_blocks          /**< [IN] - number of erasure blocks to be generated */
+  int erasure_blocks,         /**< [IN] - number of erasure blocks to be generated */
+  int set_size                /**< [IN] - number of processes to group in one redset */
 );
 
 int ER_Free_Scheme(

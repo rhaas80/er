@@ -273,7 +273,8 @@ int ER_Create_Scheme(
   MPI_Comm comm,
   const char* failure_domain,
   int encoding_blocks,
-  int erasure_blocks)
+  int erasure_blocks,
+  int set_size)
 {
   int rc = ER_SUCCESS;
 
@@ -298,7 +299,7 @@ int ER_Create_Scheme(
   redset* d = ER_MALLOC(sizeof(redset));
 
   /* create the scheme */
-  if (redset_create(encoding_type, 0, comm, failure_domain, d) == REDSET_SUCCESS) {
+  if (redset_create(encoding_type, set_size, comm, failure_domain, d) == REDSET_SUCCESS) {
     /* bump our internal counter */
     er_scheme_counter++;
 
