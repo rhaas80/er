@@ -232,7 +232,7 @@ int ER_Init(const char* conf_file)
   return rc;
 }
 
-int ER_Finalize()
+int ER_Finalize(void)
 {
   int rc = ER_SUCCESS;
 
