@@ -2,6 +2,7 @@
 #define ER_H
 
 #include "mpi.h"
+#include "kvtree.h"
 
 /** \defgroup er ER
  *  \brief Encode and Rebuild
@@ -28,6 +29,11 @@ extern "C" {
 #define ER_DIRECTION_REBUILD (2)
 #define ER_DIRECTION_REMOVE  (3)
 
+#define ER_KEY_CONFIG_DEBUG "DEBUG"
+#define ER_KEY_CONFIG_SET_SIZE "SET_SIZE"
+#define ER_KEY_CONFIG_MPI_BUF_SIZE "MPI_BUF_SIZE"
+#define ER_KEY_CONFIG_CRC_ON_COPY "CRC_ON_COPY"
+
 int ER_Init(
   const char* conf_file /**< [IN] - path to configuration file (can be NULL for default) */
 );
@@ -40,6 +46,10 @@ int ER_Create_Scheme(
   const char* failure_domain, /**< [IN] - processes with same value of failure_domain are assumed to fail at the same time */
   int data_blocks,            /**< [IN] - number of original data blocks */
   int erasure_blocks          /**< [IN] - number of erasure blocks to be generated */
+);
+
+int ER_Config(
+  const kvtree* config        /** [IN] - kvtree of options */
 );
 
 int ER_Free_Scheme(
