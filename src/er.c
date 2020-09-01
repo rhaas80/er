@@ -325,6 +325,9 @@ int ER_Config(const kvtree* config)
       kvtree_util_set_int(shuffile_config_values,
                           SHUFFILE_KEY_CONFIG_MPI_BUF_SIZE, er_mpi_buf_size);
 
+      kvtree_util_set_int(shuffile_config_values,
+                          SHUFFILE_KEY_CONFIG_DEBUG, er_debug);
+
       if (shuffile_config(shuffile_config_values) != SHUFFILE_SUCCESS)
       {
         retval = ER_FAILURE;
