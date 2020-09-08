@@ -289,6 +289,7 @@ int ER_Config(const kvtree* config)
     if (config != NULL)
     {
       const kvtree_elem* elem;
+      unsigned long ul;
 
       /* options we will pass to redset */
       kvtree* redset_config_values = kvtree_new();
@@ -300,7 +301,17 @@ int ER_Config(const kvtree* config)
       /* TODO: this could be turned into a list of structs */
       kvtree_util_get_int(config, ER_KEY_CONFIG_DEBUG, &er_debug);
       kvtree_util_get_int(config, ER_KEY_CONFIG_SET_SIZE, &er_set_size);
-      kvtree_util_get_int(config, ER_KEY_CONFIG_MPI_BUF_SIZE, &er_mpi_buf_size);
+      if (kvtree_util_get_bytecount(config, ER_KEY_CONFIG_MPI_BUF_SIZE, &ul) ==
+          KVTREE_SUCCESS) {
+        er_mpi_buf_size = (int) ul;
+        if (er_mpi_buf_size != ul) {
+          char *value;
+          kvtree_util_get_str(config, ER_KEY_CONFIG_MPI_BUF_SIZE, &value);
+          fprintf(stderr, "Value %s passed for %s exceeds int range\n",
+                  value, ER_KEY_CONFIG_MPI_BUF_SIZE);
+          retval = ER_FAILURE;
+        }
+      }
       /* TODO: handle ER_KEY_CONFIG_CRC_ON_COPY */
 
       /* pass options to redset */
