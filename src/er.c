@@ -284,112 +284,101 @@ int ER_Config(const kvtree* config)
     NULL
   };
 
-  if (!configured)
-  {
-    if (config != NULL)
-    {
-      const kvtree_elem* elem;
-      unsigned long ul;
-
-      /* options we will pass to redset */
-      kvtree* redset_config_values = kvtree_new();
-      kvtree* shuffile_config_values = kvtree_new();
-      assert(redset_config_values);
-      assert(shuffile_config_values);
-
+  if (! configured) {
+    if (config != NULL) {
       /* read out all options we know about */
       /* TODO: this could be turned into a list of structs */
       kvtree_util_get_int(config, ER_KEY_CONFIG_DEBUG, &er_debug);
+
       kvtree_util_get_int(config, ER_KEY_CONFIG_SET_SIZE, &er_set_size);
+
+      unsigned long ul;
       if (kvtree_util_get_bytecount(config, ER_KEY_CONFIG_MPI_BUF_SIZE, &ul) ==
-          KVTREE_SUCCESS) {
+          KVTREE_SUCCESS)
+      {
         er_mpi_buf_size = (int) ul;
         if (er_mpi_buf_size != ul) {
           char *value;
           kvtree_util_get_str(config, ER_KEY_CONFIG_MPI_BUF_SIZE, &value);
-          fprintf(stderr, "Value %s passed for %s exceeds int range\n",
-                  value, ER_KEY_CONFIG_MPI_BUF_SIZE);
+          er_err("Value '%s' passed for %s exceeds int range @ %s:%d",
+            value, ER_KEY_CONFIG_MPI_BUF_SIZE, __FILE__, __LINE__
+          );
           retval = ER_FAILURE;
         }
       }
       /* TODO: handle ER_KEY_CONFIG_CRC_ON_COPY */
 
       /* pass options to redset */
-      kvtree_util_set_int(redset_config_values, REDSET_KEY_CONFIG_DEBUG,
-                          er_debug);
+      kvtree* redset_config_values = kvtree_new();
 
-      kvtree_util_set_int(redset_config_values, REDSET_KEY_CONFIG_SET_SIZE,
-                          er_set_size);
+      kvtree_util_set_int(redset_config_values,
+        REDSET_KEY_CONFIG_DEBUG, er_debug);
 
-      kvtree_util_set_int(redset_config_values, REDSET_KEY_CONFIG_MPI_BUF_SIZE,
-                          er_mpi_buf_size);
+      kvtree_util_set_int(redset_config_values,
+        REDSET_KEY_CONFIG_SET_SIZE, er_set_size);
 
-      if (redset_config(redset_config_values) != REDSET_SUCCESS)
-      {
+      kvtree_util_set_int(redset_config_values,
+        REDSET_KEY_CONFIG_MPI_BUF_SIZE, er_mpi_buf_size);
+
+      if (redset_config(redset_config_values) != REDSET_SUCCESS) {
         retval = ER_FAILURE;
       }
 
       kvtree_delete(&redset_config_values);
 
       /* pass options to shuffile */
+      kvtree* shuffile_config_values = kvtree_new();
 
       kvtree_util_set_int(shuffile_config_values,
-                          SHUFFILE_KEY_CONFIG_MPI_BUF_SIZE, er_mpi_buf_size);
+        SHUFFILE_KEY_CONFIG_MPI_BUF_SIZE, er_mpi_buf_size);
 
       kvtree_util_set_int(shuffile_config_values,
-                          SHUFFILE_KEY_CONFIG_DEBUG, er_debug);
+        SHUFFILE_KEY_CONFIG_DEBUG, er_debug);
 
-      if (shuffile_config(shuffile_config_values) != SHUFFILE_SUCCESS)
-      {
+      if (shuffile_config(shuffile_config_values) != SHUFFILE_SUCCESS) {
         retval = ER_FAILURE;
       }
 
       kvtree_delete(&shuffile_config_values);
 
       /* report all unknown options (typos?) */
-      for (elem = kvtree_elem_first(config); elem ;
+      const kvtree_elem* elem;
+      for (elem = kvtree_elem_first(config);
+           elem != NULL;
            elem = kvtree_elem_next(elem))
       {
         /* must be only one level deep, ie plain kev = value */
-        {
-          const kvtree* elem_hash = kvtree_elem_hash(elem);
-          assert(kvtree_size(elem_hash) == 1);
-          {
-            const kvtree* kvtree_first_elem_hash =
-              kvtree_elem_hash(kvtree_elem_first(elem_hash));
-            assert(kvtree_size(kvtree_first_elem_hash) == 0);
+        const kvtree* elem_hash = kvtree_elem_hash(elem);
+        assert(kvtree_size(elem_hash) == 1);
+
+        const kvtree* kvtree_first_elem_hash =
+          kvtree_elem_hash(kvtree_elem_first(elem_hash));
+        assert(kvtree_size(kvtree_first_elem_hash) == 0);
+
+        /* check against known options */
+        const char** opt;
+        int found = 0;
+        for (opt = known_options; opt; opt++) {
+          if (strcmp(*opt, kvtree_elem_key(elem)) == 0) {
+            found = 1;
+            break;
           }
         }
-        /* check against known options */
-        {
-          const char** opt;
-          int found = 0;
-          for (opt = known_options; opt; opt++)
-          {
-            if (strcmp(*opt, kvtree_elem_key(elem)) == 0)
-            {
-              found = 1;
-              break;
-            }
-          }
-          if (!found)
-          {
-            fprintf(stderr,
-                    "Unknown configuration parameter '%s' with value '%s'\n",
-                    kvtree_elem_key(elem),
-                    kvtree_elem_key(kvtree_elem_first(kvtree_elem_hash(elem))));
-            retval = ER_FAILURE;
-          }
+        if (! found) {
+          er_err("Unknown configuration parameter '%s' with value '%s' @ %s:%d",
+            kvtree_elem_key(elem),
+            kvtree_elem_key(kvtree_elem_first(kvtree_elem_hash(elem))),
+            __FILE__, __LINE__
+          );
+          retval = ER_FAILURE;
         }
       }
     }
 
     /* only accept configuration options once */
     configured = 1;
-  }
-  else
-  {
-    fprintf(stderr, "Already configured\n");
+  } else {
+    er_err("Already configured @ %s:%d", __FILE__, __LINE__);
     retval = ER_FAILURE;
   }
 
