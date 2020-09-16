@@ -2,7 +2,6 @@
 #define ER_H
 
 #include "mpi.h"
-#include "kvtree.h"
 
 /** \defgroup er ER
  *  \brief Encode and Rebuild
@@ -48,6 +47,7 @@ int ER_Create_Scheme(
   int erasure_blocks          /**< [IN] - number of erasure blocks to be generated */
 );
 
+typedef struct kvtree_struct kvtree;
 int ER_Config(
   const kvtree* config        /** [IN] - kvtree of options */
 );
