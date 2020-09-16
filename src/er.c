@@ -271,9 +271,9 @@ int ER_Finalize(void)
 }
 
 /** Set a ER config parameters */
-int ER_Config(const kvtree* config)
+kvtree* ER_Config(const kvtree* config)
 {
-  int retval = ER_SUCCESS;
+  kvtree* retval = (kvtree*)config;
 
   static int configured = 0;
   static const char* known_options[] = {
@@ -284,8 +284,14 @@ int ER_Config(const kvtree* config)
     NULL
   };
 
+  /* TODO: implement getting configuration options back */
+  if (config == NULL) {
+    return NULL;
+  }
+
   if (! configured) {
     if (config != NULL) {
+
       /* read out all options we know about */
       /* TODO: this could be turned into a list of structs */
       kvtree_util_get_int(config, ER_KEY_CONFIG_DEBUG, &er_debug);
@@ -303,7 +309,7 @@ int ER_Config(const kvtree* config)
           er_err("Value '%s' passed for %s exceeds int range @ %s:%d",
             value, ER_KEY_CONFIG_MPI_BUF_SIZE, __FILE__, __LINE__
           );
-          retval = ER_FAILURE;
+          retval = NULL;
         }
       }
       /* TODO: handle ER_KEY_CONFIG_CRC_ON_COPY */
@@ -320,8 +326,8 @@ int ER_Config(const kvtree* config)
       kvtree_util_set_int(redset_config_values,
         REDSET_KEY_CONFIG_MPI_BUF_SIZE, er_mpi_buf_size);
 
-      if (redset_config(redset_config_values) != REDSET_SUCCESS) {
-        retval = ER_FAILURE;
+      if (redset_config(redset_config_values) == NULL) {
+        retval = NULL;
       }
 
       kvtree_delete(&redset_config_values);
@@ -335,8 +341,8 @@ int ER_Config(const kvtree* config)
       kvtree_util_set_int(shuffile_config_values,
         SHUFFILE_KEY_CONFIG_DEBUG, er_debug);
 
-      if (shuffile_config(shuffile_config_values) != SHUFFILE_SUCCESS) {
-        retval = ER_FAILURE;
+      if (shuffile_config(shuffile_config_values) == NULL) {
+        retval = NULL;
       }
 
       kvtree_delete(&shuffile_config_values);
@@ -370,7 +376,7 @@ int ER_Config(const kvtree* config)
             kvtree_elem_key(kvtree_elem_first(kvtree_elem_hash(elem))),
             __FILE__, __LINE__
           );
-          retval = ER_FAILURE;
+          retval = NULL;
         }
       }
     }
@@ -379,7 +385,7 @@ int ER_Config(const kvtree* config)
     configured = 1;
   } else {
     er_err("Already configured @ %s:%d", __FILE__, __LINE__);
-    retval = ER_FAILURE;
+    retval = NULL;
   }
 
   return retval;

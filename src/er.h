@@ -47,9 +47,21 @@ int ER_Create_Scheme(
   int erasure_blocks          /**< [IN] - number of erasure blocks to be generated */
 );
 
+/**
+ * Get/set ER configuration values.
+ *
+ * config: The new configuration.  Global variables are in top level of
+ *         the tree, and per-ID values are subtrees.  If config=NULL,
+ *         then return a kvtree with all the configuration values (globals
+ *         and all per-ID trees).
+ *
+ * Return value: If config != NULL, then return config on success.  If
+ *               config=NULL (you're querying the config) then return
+ *               a new kvtree on success.  Return NULL on any failures.
+ */
 typedef struct kvtree_struct kvtree;
-int ER_Config(
-  const kvtree* config        /** [IN] - kvtree of options */
+kvtree* ER_Config(
+  const kvtree* config /** [IN] - kvtree of options */
 );
 
 int ER_Free_Scheme(
