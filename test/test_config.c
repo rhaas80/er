@@ -45,17 +45,15 @@ main(int argc, char *argv[]) {
     }
 
     printf("Configuring ER...\n");
-    rc = ER_Config(er_config_values);
-    if (rc != ER_SUCCESS) {
-        printf("ER_Config() failed (error %d)\n", rc);
-        return rc;
+    if (ER_Config(er_config_values) == NULL) {
+        printf("ER_Config() failed\n");
+        return EXIT_FAILURE;
     }
 
     printf("Configuring ER a second time (this should fail)...\n");
-    rc = ER_Config(er_config_values);
-    if (rc == ER_SUCCESS) {
-        printf("ER_Config() succeeded unexpectedly (error %d)\n", rc);
-        return rc;
+    if (ER_Config(er_config_values) != NULL) {
+        printf("ER_Config() succeeded unexpectedly\n");
+        return EXIT_FAILURE;
     }
 
     if (er_debug != !old_er_debug) {
